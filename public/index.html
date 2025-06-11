@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кінотеатр у Вінниці - Cinema City</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            text-align: center;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #000;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        header nav {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        header nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .search-container {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            max-width: 300px;
+            margin-left: 20px;
+        }
+        .search-container input {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #333;
+            color: white;
+            outline: none;
+            width: 100%;
+        }
+        .search-container button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .auth-buttons .btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .auth-buttons .btn:hover {
+            background-color: #218838;
+        }
+        .auth-buttons #logoutButton {
+            background-color: #dc3545;
+        }
+        .auth-buttons #logoutButton:hover {
+            background-color: #c82333;
+        }
+
+        /* Стилі для слайдера головного зображення */
+        .main-image-slider {
+            position: relative;
+            width: 100%;
+            max-height: 400px;
+            overflow: hidden;
+        }
+
+        .slider-image {
+            width: 100%;
+            height: 400px; /* Фіксована висота для всіх зображень */
+            object-fit: cover;
+            display: block;
+            opacity: 0; /* Приховано за замовчуванням */
+            position: absolute; /* Для накладання */
+            top: 0;
+            left: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .slider-image.active {
+            opacity: 1;
+            position: relative; /* Активне зображення займає простір */
+        }
+
+        .slider-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: left;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            pointer-events: none; /* Щоб не блокувати кліки під ним */
+        }
+
+        .slider-caption.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            margin-top: 40px;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .movies {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .movie {
+            background-color: #1e1e1e;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease-in-out;
+            cursor: pointer;
+            height: 380px;
+        }
+        /* Анімація збільшення зображення афіш при наведенні мишкою */
+        .movie:hover {
+            transform: translateY(-5px) scale(1.03); /* Збільшення та невеликий підйом */
+        }
+        .movie img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .movie h3 {
+            font-size: 16px;
+            margin: 0 0 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .movie p {
+            margin: 0;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .movie-genre {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+        .movie-showtimes {
+            font-size: 14px;
+            color: #ddd;
+        }
+        .movie-rating {
+            font-size: 14px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+
+        .schedule-list { /* Змінено з .schedule на .schedule-list */
+            margin: 40px auto;
+            max-width: 800px; /* Збільшив ширину для кращого вигляду */
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Адаптивна сітка для розкладу */
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .schedule {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .schedule img {
+            width: 100px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 15px;
+            float: left; /* Для обтікання текстом */
+        }
+        .schedule h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+        .schedule p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .buy-button {
+            display: inline-block;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            align-self: flex-end; /* Вирівнювання кнопки по правому краю */
+        }
+        .buy-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Модальні вікна */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #007BFF;
+            text-align: center;
+        }
+        .modal-content label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .modal-content input[type="text"],
+        .modal-content input[type="password"],
+        .modal-content input[type="email"],
+        .modal-content input[type="number"],
+        .modal-content input[type="file"],
+        .modal-content textarea { /* Додано textarea */
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            outline: none;
+            box-sizing: border-box; /* Для коректної ширини */
+        }
+        .modal-content button {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Стилі для особистого кабінету */
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 2px solid #007BFF;
+        }
+        .profile-info p {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .profile-info span {
+            font-weight: bold;
+            color: #007BFF;
+        }
+        .profile-tickets h4 {
+            margin-top: 20px;
+            color: #007BFF;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+        .ticket-item {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            position: relative;
+        }
+        .ticket-item strong {
+            color: #eee;
+        }
+        .cancel-ticket-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            transition: background-color 0.3s ease;
+        }
+        .cancel-ticket-button:hover {
+            background-color: #c82333;
+        }
+        .topup-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #555;
+        }
+        .topup-section input {
+            width: calc(100% - 22px);
+            margin-right: 10px;
+        }
+        .topup-section button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+
+        /* Адаптивність для header */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            header nav, .search-container, .auth-buttons {
+                margin-left: 0;
+                width: 100%;
+                justify-content: center;
+            }
+            .search-container {
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-left: 0;
+            }
+            .search-container input {
+                width: calc(100% - 10px);
+                margin-bottom: 10px;
+            }
+            .search-container button {
+                width: 100%;
+                margin-left: 0;
+            }
+            .modal-content {
+                width: 90%;
+                padding: 20px;
+            }
+        }
+        /* Адаптивність для сітки фільмів - 4 в ряд на великих екранах */
+        @media (min-width: 992px) { /* Десктоп */
+            .movies {
+                grid-template-columns: repeat(4, 1fr); /* 4 фільми в ряд */
+            }
+            .movie {
+                height: 350px; /* Збільшена висота, щоб краще виглядати */
+            }
+            .movie img {
+                height: 220px; /* Зменшена висота постера, щоб помістилися інші елементи */
+            }
+        }
+        /* --- НОВІ СТИЛІ для детальної сторінки фільму та вибору місць --- */
+        .movie-details-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            overflow-y: auto;
+            z-index: 90;
+            padding-top: 80px;
+        }
+        .details-header {
+            background-size: cover;
+            background-position: center;
+            height: 300px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+        }
+        .details-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, #121212 0%, rgba(18,18,18,0.7) 50%, rgba(18,18,18,0.3) 100%);
+        }
+        .details-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: -100px auto 20px;
+            padding: 0 20px;
+            text-align: center;
+        }
+        .details-poster-img {
+            width: 200px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+        .details-info {
+            text-align: center;
+            flex-grow: 1;
+            padding-left: 0;
+        }
+        .details-info h2 {
+            font-size: 38px;
+            margin: 0 0 10px;
+            color: #007BFF;
+        }
+        .details-rating-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        .details-description {
+            font-size: 16px;
+            color: #ccc;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .details-misc-info {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+        .details-trailer-section {
+            margin-top: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            width: 100%; /* Забезпечити повну ширину */
+            max-width: 800px; /* Обмеження ширини */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .details-trailer-section h3 {
+            color: #007BFF;
+            margin-bottom: 15px;
+        }
+        .trailer-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .trailer-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .details-showtimes-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #007BFF;
+            text-align: center;
+        }
+        .details-showtimes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 0 auto;
+            max-width: 800px;
+            padding-bottom: 40px;
+        }
+        .details-showtimes-grid button {
+            background-color: #333;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .details-showtimes-grid button:hover {
+            background-color: #007BFF;
+            border-color: #007BFF;
+        }
+        /* --- Seat Selection Section on Details Page --- */
+        .screen-indicator {
+            background-color: #555;
+            height: 10px;
+            width: 80%;
+            margin: 0 auto 30px;
+            border-radius: 5px;
+        }
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr); /* 10 місць у ряду */
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center; /* Центруємо ряди */
+            max-width: 500px; /* Обмежуємо ширину сітки */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .seat {
+            width: 40px;
+            height: 40px;
+            background-color: #4CAF50; /* Зелений - вільне */
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+        }
+        .seat.occupied {
+            background-color: #F44336; /* Червоний - зайняте */
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .seat.selected {
+            background-color: #2196F3; /* Синій - обране */
+            transform: scale(1.1);
+            border: 2px solid #FFD700; /* Золотий обідок */
+        }
+        .seat:not(.occupied):hover {
+            transform: scale(1.05);
+            background-color: #66BB6A; /* Світліший зелений на ховер */
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        .total-info {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .total-info span {
+            color: #007BFF;
+        }
+        .confirm-seats-button {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+        .confirm-seats-button:hover {
+            background-color: #0056b3;
+        }
+        .confirm-seats-button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        /* --- Payment Modal --- */
+        .payment-modal {
+            display: none;
+            position: fixed;
+            z-index: 120;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+        }
+        .payment-modal-content {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+            text-align: left;
+        }
+        .payment-modal-content h3 {
+            color: #007BFF;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+        .payment-modal-content .form-group {
+            margin-bottom: 15px;
+        }
+        .payment-modal-content label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .payment-modal-content input[type="text"],
+        .payment-modal-content input[type="number"],
+        .payment-modal-content select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: white;
+            outline: none;
+            box-sizing: border-box; /* Для коректної ширини */
+        }
+        .payment-modal-content .card-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .payment-modal-content .card-details .form-group:last-child {
+            grid-column: span 2;
+        }
+        .payment-modal-content .pay-button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .payment-modal-content .pay-button:hover {
+            background-color: #218838;
+        }
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .payment-method-button {
+            background-color: #333;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .payment-method-button:hover {
+            background-color: #555;
+            border-color: #777;
+        }
+        .payment-method-button img {
+            height: 24px;
+            width: auto;
+        }
+        /* Mobile adaptation for movie details */
+        @media (max-width: 768px) {
+            .details-content {
+                flex-direction: column;
+                align-items: center;
+                margin-top: -80px;
+                padding: 0 10px;
+            }
+            .details-poster-img {
+                width: 150px;
+                height: 225px;
+            }
+            .details-info {
+                padding-left: 0;
+                text-align: center;
+            }
+            .details-info h2 {
+                font-size: 28px;
+            }
+            .details-rating-info, .details-misc-info {
+                justify-content: center;
+            }
+            .details-showtimes-grid {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            }
+            .seat-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            .payment-methods {
+                flex-direction: column;
+                align-items: center;
+            }
+            .payment-modal-content .card-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Стилі для футера */
+        footer {
+            background-color: #000;
+            color: #fff;
+            padding: 20px;
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        footer a:hover {
+            color: #007BFF;
+        }
+
+        /* Стилі для адмін-панелі */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            overflow-y: auto;
+            z-index: 100;
+            padding: 20px;
+        }
+        .admin-panel-content {
+            background-color: #1e1e1e;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: left;
+            position: relative;
+        }
+        .admin-panel-content h2 {
+            text-align: center;
+            color: #007BFF;
+            margin-bottom: 30px;
+        }
+        .admin-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        .admin-section h3 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        .admin-section button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .admin-section button:hover {
+            background-color: #0056b3;
+        }
+        .admin-section input, .admin-section textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            box-sizing: border-box; /* Для коректної ширини */
+        }
+        .admin-movie-item, .admin-user-item {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-movie-item button, .admin-user-item button {
+            margin-left: 10px;
+            flex-shrink: 0; /* Щоб кнопки не зменшувались */
+        }
+        .admin-ticket-item {
+            background-color: #333;
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="mainContent" class="main-content-wrapper">
+        <header>
+            <h1>CINEMA CITY</h1>
+            <nav>
+                <a href="#afisha">АФІША</a>
+                <a href="#rozklad">РОЗКЛАД</a>
+                <a href="#" id="profileLink" style="display: none;">ОСОБИСТИЙ КАБІНЕТ</a>
+                <a href="#" id="adminPanelLink" style="display: none;">АДМІН-ПАНЕЛЬ</a>
+            </nav>
+            <div class="search-container">
+                <input type="text" id="movieSearch" placeholder="Пошук фільмів...">
+                <button onclick="searchMovies()">Знайти</button>
+            </div>
+            <div class="auth-buttons">
+                <a href="#" class="btn" id="loginButton">УВІЙТИ</a>
+                <a href="#" class="btn" id="registerButton">ЗАРЕЄСТРУВАТИСЯ</a>
+                <a href="#" class="btn" id="logoutButton" style="display: none;">ВИЙТИ</a>
+            </div>
+        </header>
+
+        <div class="main-image-slider" id="mainImageSlider">
+            </div>
+
+        <div id="afisha" class="section-title">АФІША</div>
+        <div class="movies">
+            </div>
+
+        <div id="rozklad" class="section-title">РОЗКЛАД</div>
+        <div class="schedule-list">
+            </div>
+    </div>
+
+    <div id="movieDetailsPage" class="movie-details-page">
+        <span class="close-button" id="closeDetailsPage">×</span>
+        <div id="detailsHeader" class="details-header"></div>
+        <div class="details-content">
+            <img id="detailsPoster" class="details-poster-img" src="" alt="Постер фільму">
+            <div class="details-info">
+                <h2 id="detailsTitle">Назва Фільму</h2>
+                <p id="detailsRating" class="details-rating-info"></p>
+                <p id="detailsGenre" class="details-misc-info"></p>
+                <p id="detailsDuration" class="details-misc-info"></p>
+                <p id="detailsDescription" class="details-description"></p>
+                <p id="detailsCast" class="details-misc-info"></p>
+            </div>
+            <div id="detailsTrailerSection" class="details-trailer-section" style="display: none;">
+                <h3>Трейлер</h3>
+                <div class="trailer-container">
+                    <iframe id="movieTrailer" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+
+            <h3 class="details-showtimes-title">Час сеансів:</h3>
+            <div id="detailsShowtimes" class="details-showtimes-grid">
+            </div>
+
+            <div id="seatSelectionSection" style="display: none; width: 100%; max-width: 800px; margin: 40px auto; background-color: #1e1e1e; padding: 20px; border-radius: 10px;">
+                <h3 style="text-align: center; color: #007BFF; margin-bottom: 20px;">Оберіть місця</h3>
+                <div class="screen-indicator"></div>
+                <div id="seatGrid" class="seat-grid">
+                </div>
+                <div class="legend">
+                    <div class="legend-item"><span class="legend-color" style="background-color: #4CAF50;"></span> Вільне</div>
+                    <div class="legend-item"><span class="legend-color" style="background-color: #F44336;"></span> Зайняте</div>
+                    <div class="legend-item"><span class="legend-color" style="background-color: #2196F3;"></span> Обране</div>
+                </div>
+                <p class="total-info">Обрано місць: <span id="selectedSeatsCount">0</span></p>
+                <p class="total-info">Загальна вартість: <span id="totalPrice">0</span> грн</p>
+                <button id="confirmSeatsButton" class="confirm-seats-button" disabled>ПІДТВЕРДИТИ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeLoginModal">×</span>
+            <h2>Вхід</h2>
+            <div id="loginMessage" style="color: red; margin-bottom: 10px;"></div>
+            <label for="loginUsername">Ім'я користувача:</label>
+            <input type="text" id="loginUsername" placeholder="Ваше ім'я користувача">
+            <label for="loginPassword">Пароль:</label>
+            <input type="password" id="loginPassword" placeholder="Ваш пароль">
+            <button id="loginSubmit">УВІЙТИ</button>
+            <p style="text-align: center; margin-top: 15px;">Немає акаунту? <a href="#" id="switchToRegister">Зареєструватися</a></p>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeRegisterModal">×</span>
+            <h2>Реєстрація</h2>
+            <div id="registerMessage" style="color: red; margin-bottom: 10px;"></div>
+            <label for="registerUsername">Ім'я користувача:</label>
+            <input type="text" id="registerUsername" placeholder="Придумайте ім'я користувача">
+            <label for="registerEmail">Email:</label>
+            <input type="email" id="registerEmail" placeholder="Ваш email">
+            <label for="registerPassword">Пароль:</label>
+            <input type="password" id="registerPassword" placeholder="Придумайте пароль">
+            <label for="registerConfirmPassword">Підтвердіть пароль:</label>
+            <input type="password" id="registerConfirmPassword" placeholder="Повторіть пароль">
+            <button id="registerSubmit">ЗАРЕЄСТРУВАТИСЯ</button>
+            <p style="text-align: center; margin-top: 15px;">Вже маєте акаунт? <a href="#" id="switchToLogin">Увійти</a></p>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeProfileModal">×</span>
+            <h2>Особистий Кабінет</h2>
+            <div class="profile-info">
+                <img id="profileAvatar" class="profile-avatar" src="default_avatar.png" alt="Аватар користувача">
+                <input type="file" id="avatarUpload" accept="image/*" style="margin-bottom: 15px;">
+                <button onclick="uploadAvatar()">Завантажити аватар</button>
+                <p>Ім'я користувача: <span id="profileUsername"></span></p>
+                <p>Email: <span id="profileEmail"></span></p>
+                <p>Баланс: <span id="profileBalance">0</span> грн</p>
+            </div>
+            <div class="topup-section">
+                <h4>Поповнити баланс</h4>
+                <input type="number" id="topupAmount" placeholder="Сума поповнення (грн)" min="1">
+                <button id="topupButton">ПОПОВНИТИ</button>
+            </div>
+            <div class="profile-tickets">
+                <h4>Ваші квитки</h4>
+                <div id="userTickets">
+                    <p>Наразі у вас немає придбаних квитків.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentModal" class="payment-modal">
+        <div class="payment-modal-content">
+            <span class="close-button" id="closePaymentModal">×</span>
+            <h3>Оплата квитків</h3>
+            <div id="paymentMessage" style="color: red; margin-bottom: 15px;"></div>
+
+            <div class="payment-methods">
+                <button class="payment-method-button" onclick="processPayment('Apple Pay')">
+                    <img src="Apple_Pay_logo.svg.png" alt="Apple Pay Logo">
+                    Apple Pay
+                </button>
+                <button class="payment-method-button" onclick="processPayment('Google Pay')">
+                    <img src="google-pay-logo_1280x531.png" alt="Google Pay Logo">
+                    Google Pay
+                </button>
+            </div>
+
+            <p style="text-align: center; margin: 20px 0;">Або оплата карткою:</p>
+
+            <div class="form-group">
+                <label for="cardName">Ім'я на картці:</label>
+                <input type="text" id="cardName" placeholder="Ім'я та прізвище" required>
+            </div>
+            <div class="form-group">
+                <label for="cardNumber">Номер картки:</label>
+                <input type="text" id="cardNumber" placeholder="**** **** **** ****" maxlength="19" required>
+            </div>
+            <div class="card-details">
+                <div class="form-group">
+                    <label for="cardExpiry">Термін дії (MM/YY):</label>
+                    <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" required>
+                </div>
+                <div class="form-group">
+                    <label for="cardCvv">CVV:</label>
+                    <input type="text" id="cardCvv" placeholder="***" maxlength="3" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="paymentTotalAmount">До сплати:</label>
+                <input type="text" id="paymentTotalAmount" value="0 грн" readonly>
+            </div>
+            <button id="payButton" class="pay-button">СПЛАТИТИ КАРТКОЮ</button>
+        </div>
+    </div>
+
+    <div id="adminPanel" class="admin-panel">
+        <div class="admin-panel-content">
+            <span class="close-button" id="closeAdminPanel">×</span>
+            <h2>Адмін-панель</h2>
+
+            <div class="admin-section">
+                <h3>Управління фільмами</h3>
+                <div id="adminMoviesList">
+                    </div>
+                <h4>Додати/Редагувати фільм</h4>
+                <input type="hidden" id="adminMovieId" value="">
+                <label for="adminMovieTitle">Назва фільму:</label>
+                <input type="text" id="adminMovieTitle">
+                <label for="adminMoviePoster">URL постера:</label>
+                <input type="text" id="adminMoviePoster">
+                <label for="adminMovieBackground">URL фонового зображення (для детальної сторінки):</label>
+                <input type="text" id="adminMovieBackground">
+                <label for="adminMovieGenre">Жанр:</label>
+                <input type="text" id="adminMovieGenre">
+                <label for="adminMovieRating">Рейтинг:</label>
+                <input type="text" id="adminMovieRating">
+                <label for="adminMovieDuration">Тривалість:</label>
+                <input type="text" id="adminMovieDuration">
+                <label for="adminMovieDescription">Опис:</label>
+                <textarea id="adminMovieDescription"></textarea>
+                <label for="adminMovieCast">У ролях:</label>
+                <input type="text" id="adminMovieCast">
+                <label for="adminMovieTrailer">URL трейлера (YouTube embed):</label>
+                <input type="text" id="adminMovieTrailer" placeholder="Наприклад, https://www.youtube.com/embed/dQw4w9WgXcQ">
+                <label for="adminMoviePrice">Ціна квитка:</label>
+                <input type="number" id="adminMoviePrice" min="0" step="1">
+                <label for="adminMoviePremiere">Прем'єра (для слайдера):</label>
+                <input type="checkbox" id="adminMoviePremiere">
+                <button id="saveMovieButton">Зберегти фільм</button>
+            </div>
+
+            <div class="admin-section">
+                <h3>Управління користувачами та квитками</h3>
+                <div id="adminUsersList">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Cinema City. Всі права захищені.</p>
+        <a href="#" id="supportLink">Техпідтримка</a>
+    </footer>
+
+    <div id="supportModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeSupportModal">×</span>
+            <h2>Зв'язок з техпідтримкою</h2>
+            <p>Будь ласка, опишіть вашу проблему або питання. Ми зв'яжемося з вами найближчим часом.</p>
+            <div id="supportMessage" style="color: green; margin-bottom: 10px;"></div>
+            <label for="supportName">Ваше ім'я:</label>
+            <input type="text" id="supportName" placeholder="Ваше ім'я" value="">
+            <label for="supportEmail">Ваш Email:</label>
+            <input type="email" id="supportEmail" placeholder="Ваш Email" value="">
+            <label for="supportMessageText">Опис проблеми:</label>
+            <textarea id="supportMessageText" rows="5" placeholder="Опишіть вашу проблему..."></textarea>
+            <button id="submitSupportRequest">НАДІСЛАТИ ЗАПИТ</button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- ДАНІ ФІЛЬМІВ (РАЗОМ З ТРЕЙЛЕРАМИ) ---
+        // Якщо даних немає, завантажуємо початкові.
+        // Завжди перезаписуємо, якщо localStorage порожній або пошкоджений.
+        let moviesData = JSON.parse(localStorage.getItem('moviesData'));
+        if (!moviesData || Object.keys(moviesData).length === 0) {
+            moviesData = {
+                karateKid: {
+                    title: "Карате Кід: Легенди",
+                    poster: "poster-1748357141.jpg",
+                    background: "poster-1748357141.jpg",
+                    trailer: "https://www.youtube.com/embed/oQ3Q1u_D79g", // Приклад трейлера
+                    genre: "Пригоди, Драма, Бойовик",
+                    rating: "7.8/10",
+                    duration: "2 год 10 хв",
+                    description: "Майстри бойових мистецтв об'єднуються, щоб створити нову легенду, передаючи свої знання молодому поколінню та протистоячи новим викликам.",
+                    cast: "Джекі Чан, Бен Ван, Ральф Мачіо",
+                    showtimes: {
+                        "Сьогодні, 12 червня": ["10:00", "14:30", "19:00"],
+                        "Завтра, 13 червня": ["11:00", "16:00", "20:30"]
+                    },
+                    price: 150,
+                    isPremiere: true
+                },
+                shadowsOfUnforgottenAncestors: {
+                    title: "Тіні незабутих предків",
+                    poster: "4720cef36bc54a6e8bcae8ac8fa15e41_594a97fc0ba1c.jpg",
+                    background: "4720cef36bc54a6e8bcae8ac8fa15e41_594a97fc0ba1c.jpg",
+                    trailer: "https://www.youtube.com/embed/9bZknJ1dD1Y", // Приклад трейлера
+                    genre: "Жахи, Містика, Драма",
+                    rating: "6.5/10",
+                    duration: "1 год 45 хв",
+                    description: "Група молодих людей вирушає в Карпати, де стикаються зі стародавніми легендами та небезпечними духами минулого.",
+                    cast: "Дмитро Ступка, Олена Мусієнко, Павло Лі",
+                    showtimes: {
+                        "13 червня": ["18:00", "22:00"],
+                        "14 червня": ["19:00", "21:30"]
+                    },
+                    price: 130,
+                    isPremiere: true
+                },
+                finalDestination: {
+                    title: "Пункт призначення: Родове прокляття",
+                    poster: "rod.jpg",
+                    background: "rod.jpg",
+                    trailer: "https://www.youtube.com/embed/wzXjX3oN3lA", // Приклад трейлера
+                    genre: "Жахи, Трилер",
+                    rating: "7.0/10",
+                    duration: "1 год 35 хв",
+                    description: "Смерть передається у спадок, і нові жертви мають знайти спосіб розірвати ланцюг родового прокляття, перш ніж їх спіткає неминуча доля.",
+                    cast: "Невідомо",
+                    showtimes: {
+                        "20 травня": ["19:30", "21:45"],
+                        "21 травня": ["18:30", "20:45"]
+                    },
+                    price: 140,
+                    isPremiere: false
+                },
+                garfield: {
+                    title: "Гарфілд у кіно",
+                    poster: "poster_4.jpg",
+                    background: "poster_4.jpg",
+                    trailer: "https://www.youtube.com/embed/Pj152wD9wE4", // Приклад трейлера
+                    genre: "Анімація, Комедія, Пригоди",
+                    rating: "7.2/10",
+                    duration: "1 год 40 хв",
+                    description: "Вуличний кіт Гарфілд зустрічає свого давно загубленого батька, незграбного вуличного кота Віка, і разом з ним вирушає у ризиковану пригоду.",
+                    cast: "Кріс Претт (голос), Семюел Л. Джексон (голос)",
+                    showtimes: {
+                        "Скоро": ["10:00", "12:00", "14:00"]
+                    },
+                    price: 120,
+                    isPremiere: true
+                },
+                minecraft: {
+                    title: "Майнкрафт Фільм",
+                    poster: "opt_520c6a02-cc86-472e-9ba3-7b90da033c5a.webp",
+                    background: "opt_520c6a02-cc86-472e-9ba3-7b90da033c5a.webp",
+                    trailer: "https://www.youtube.com/embed/Mvh2k7wVn28", // Приклад трейлера
+                    genre: "Пригоди, Фентезі, Комедія",
+                    rating: "8.0/10",
+                    duration: "2 год 00 хв",
+                    description: "Епічна пригода, що переносить героїв у кубічний світ Майнкрафту, де їм доведеться протистояти небезпеці та врятувати свій дім.",
+                    cast: "Джейсон Момоа, Джек Блек, Дженна Ортега",
+                    showtimes: {
+                        "3 квітня": ["13:00", "17:00", "21:00"]
+                    },
+                    price: 160,
+                    isPremiere: false
+                },
+                unbreakableFriends: {
+                    title: "Друзі Нерозлийвода",
+                    poster: "736_2_638391896401029678.jpg",
+                    background: "736_2_638391896401029678.jpg",
+                    trailer: "https://www.youtube.com/embed/K4yCqP5i8k0", // Приклад трейлера
+                    genre: "Анімація, Пригоди, Комедія",
+                    rating: "7.5/10",
+                    duration: "1 год 30 хв",
+                    description: "Нові пригоди славетних героїв від авторів 'Історії Іграшок'.",
+                    cast: "Актори озвучення",
+                    showtimes: {
+                        "3 січня": ["10:30", "14:00"],
+                        "4 січня": ["11:00", "15:30"]
+                    },
+                    price: 110,
+                    isPremiere: false
+                },
+                cinemaOpenAir: {
+                    title: "Кіно просто неба",
+                    poster: "download.jpg",
+                    background: "download.jpg",
+                    trailer: "",
+                    genre: "Мультфільм",
+                    rating: "Вхід вільний",
+                    duration: "Не вказано",
+                    description: "Безкоштовний показ мультфільму під відкритим небом.",
+                    cast: "Не застосовується",
+                    showtimes: {
+                        "27 липня": ["20:00 (початок)"]
+                    },
+                    price: 0,
+                    isPremiere: false
+                },
+                shortFilmFestival: {
+                    title: "Кінофестиваль Короткий Метр",
+                    poster: "cfebf9b1abb6f51a28af683e54e11274.jpg",
+                    background: "cfebf9b1abb6f51a28af683e54e11274.jpg",
+                    trailer: "https://www.youtube.com/embed/your_short_film_festival_trailer_id", // Приклад трейлера
+                    genre: "Фестиваль, Короткий метр",
+                    rating: "Немає",
+                    duration: "Не вказано",
+                    description: "Вечір короткометражних фільмів. Переможці фестивалю та найкращі роботи.",
+                    cast: "Різні",
+                    showtimes: {
+                        "17 серпня": ["19:00 (початок)"]
+                    },
+                    price: 85,
+                    isPremiere: false
+                }
+            };
+            saveMoviesData(); // Зберігаємо початкові дані у localStorage
+        }
+
+
+        function saveMoviesData() {
+            localStorage.setItem('moviesData', JSON.stringify(moviesData));
+        }
+
+        // --- ГЛОБАЛЬНІ ЗМІННІ ---
+        let currentUser = null;
+        let selectedSeats = [];
+        let currentMovieId = null;
+        let currentShowtime = null;
+        let currentPricePerSeat = 0;
+        let premiereMovies = Object.keys(moviesData).filter(key => moviesData[key].isPremiere);
+        let currentPremiereIndex = 0;
+        let sliderInterval;
+
+        // --- ЕЛЕМЕНТИ DOM ---
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const profileModal = document.getElementById('profileModal');
+        const paymentModal = document.getElementById('paymentModal');
+        const movieDetailsPage = document.getElementById('movieDetailsPage');
+        const adminPanel = document.getElementById('adminPanel');
+        const supportModal = document.getElementById('supportModal');
+
+        const loginButton = document.getElementById('loginButton');
+        const registerButton = document.getElementById('registerButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const profileLink = document.getElementById('profileLink');
+        const adminPanelLink = document.getElementById('adminPanelLink');
+        const supportLink = document.getElementById('supportLink');
+
+        // --- МОДАЛЬНІ ВІКНА: ЗАКРИТТЯ ---
+        document.querySelectorAll('.close-button').forEach(button => {
+            button.onclick = function() {
+                this.closest('.modal, .movie-details-page, .payment-modal, .admin-panel').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block'; // Показати основний контент
+                if (sliderInterval) { // Перезапустити слайдер, якщо він був зупинений
+                    startSlider();
+                }
+            }
+        });
+
+        // --- МОДАЛЬНІ ВІКНА: ПЕРЕМИКАННЯ РЕЄСТРАЦІЇ/ВХОДУ ---
+        document.getElementById('switchToRegister').onclick = function() {
+            loginModal.style.display = 'none';
+            registerModal.style.display = 'flex';
+        };
+        document.getElementById('switchToLogin').onclick = function() {
+            registerModal.style.display = 'none';
+            loginModal.style.display = 'flex';
+        };
+
+        // --- АВТЕНТИФІКАЦІЯ КОРИСТУВАЧІВ (СПРОЩЕНО) ---
+        // Завантажуємо користувачів з localStorage, додаємо адміна, якщо його немає
+        const users = JSON.parse(localStorage.getItem('users')) || {};
+        if (!users['admin']) {
+            users['admin'] = {
+                username: 'admin',
+                email: 'admin@cinema.com',
+                password: 'adminpass', // В реальному проекті паролі хешуються!
+                balance: 99999,
+                tickets: [],
+                isAdmin: true,
+                avatar: null
+            };
+            saveUsers();
+        }
+
+        function saveUsers() {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        loginButton.onclick = () => {
+            loginModal.style.display = 'flex';
+            document.getElementById('loginMessage').textContent = '';
+            stopSlider(); // Зупинити слайдер при відкритті модалки
+        };
+        registerButton.onclick = () => {
+            registerModal.style.display = 'flex';
+            document.getElementById('registerMessage').textContent = '';
+            stopSlider(); // Зупинити слайдер при відкритті модалки
+        };
+
+        document.getElementById('loginSubmit').onclick = () => {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const messageDiv = document.getElementById('loginMessage');
+
+            if (users[username] && users[username].password === password) {
+                currentUser = users[username];
+                messageDiv.textContent = 'Вхід успішний!';
+                messageDiv.style.color = 'green';
+                setTimeout(() => {
+                    loginModal.style.display = 'none';
+                    updateAuthUI();
+                }, 1000);
+            } else {
+                messageDiv.textContent = 'Невірне ім\'я користувача або пароль.';
+                messageDiv.style.color = 'red';
+            }
+        };
+
+        document.getElementById('registerSubmit').onclick = () => {
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const messageDiv = document.getElementById('registerMessage');
+
+            if (users[username]) {
+                messageDiv.textContent = 'Користувач з таким ім\'ям вже існує.';
+                messageDiv.style.color = 'red';
+                return;
+            }
+            if (password !== confirmPassword) {
+                messageDiv.textContent = 'Паролі не співпадають.';
+                messageDiv.style.color = 'red';
+                return;
+            }
+            if (password.length < 6) {
+                messageDiv.textContent = 'Пароль має бути не менше 6 символів.';
+                messageDiv.style.color = 'red';
+                return;
+            }
+
+            users[username] = {
+                username,
+                email,
+                password,
+                balance: 0,
+                tickets: [],
+                isAdmin: false,
+                avatar: null // Аватар за замовчуванням null
+            };
+            saveUsers();
+            messageDiv.textContent = 'Реєстрація успішна! Тепер ви можете увійти.';
+            messageDiv.style.color = 'green';
+            setTimeout(() => {
+                registerModal.style.display = 'none';
+                loginModal.style.display = 'flex';
+            }, 1000);
+        };
+
+        logoutButton.onclick = () => {
+            currentUser = null;
+            updateAuthUI();
+            alert('Ви вийшли з акаунту.');
+        };
+
+        // --- ОСОБИСТИЙ КАБІНЕТ ---
+        profileLink.onclick = () => {
+            if (currentUser) {
+                document.getElementById('profileUsername').textContent = currentUser.username;
+                document.getElementById('profileEmail').textContent = currentUser.email;
+                document.getElementById('profileBalance').textContent = currentUser.balance.toFixed(2);
+                document.getElementById('profileAvatar').src = currentUser.avatar || 'default_avatar.png'; // Завантажуємо аватар
+                displayUserTickets();
+                profileModal.style.display = 'flex';
+                stopSlider();
+            } else {
+                alert('Будь ласка, увійдіть, щоб переглянути особистий кабінет.');
+                loginModal.style.display = 'flex';
+                stopSlider();
+            }
+        };
+
+        document.getElementById('topupButton').onclick = () => {
+            const amount = parseFloat(document.getElementById('topupAmount').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert('Будь ласка, введіть коректну суму для поповнення.');
+                return;
+            }
+            if (currentUser) {
+                currentUser.balance += amount;
+                users[currentUser.username] = currentUser;
+                saveUsers();
+                document.getElementById('profileBalance').textContent = currentUser.balance.toFixed(2);
+                document.getElementById('topupAmount').value = '';
+                alert(`Баланс успішно поповнено на ${amount.toFixed(2)} грн.`);
+            }
+        };
+
+        function displayUserTickets() {
+            const userTicketsDiv = document.getElementById('userTickets');
+            userTicketsDiv.innerHTML = '';
+            if (currentUser && currentUser.tickets.length > 0) {
+                currentUser.tickets.forEach((ticket, index) => {
+                    const ticketItem = document.createElement('div');
+                    ticketItem.classList.add('ticket-item');
+                    ticketItem.innerHTML = `
+                        <p><strong>Фільм:</strong> ${ticket.movieTitle}</p>
+                        <p><strong>Час:</strong> ${ticket.showtime}</p>
+                        <p><strong>Місця:</strong> ${ticket.seats.join(', ')}</p>
+                        <p><strong>Вартість:</strong> ${ticket.totalPrice.toFixed(2)} грн</p>
+                        <button class="cancel-ticket-button" data-ticket-index="${index}">Відмінити квиток</button>
+                    `;
+                    userTicketsDiv.appendChild(ticketItem);
+                });
+                // Додаємо обробники для кнопок скасування
+                document.querySelectorAll('.cancel-ticket-button').forEach(button => {
+                    button.onclick = (event) => cancelTicket(event.target.dataset.ticketIndex);
+                });
+            } else {
+                userTicketsDiv.innerHTML = '<p>Наразі у вас немає придбаних квитків.</p>';
+            }
+        }
+
+        // --- ВІДМІНА КВИТКА З ПОВЕРНЕННЯМ КОШТІВ ---
+        function cancelTicket(ticketIndex) {
+            if (!currentUser || !currentUser.tickets[ticketIndex]) {
+                alert('Помилка: квиток не знайдено.');
+                return;
+            }
+
+            const ticket = currentUser.tickets[ticketIndex];
+            const confirmCancellation = confirm(`Ви впевнені, що хочете відмінити квиток на фільм "${ticket.movieTitle}" (${ticket.showtime}) за ${ticket.totalPrice.toFixed(2)} грн? Кошти будуть повернуті на ваш баланс.`);
+
+            if (confirmCancellation) {
+                // Повернення коштів на баланс
+                currentUser.balance += ticket.totalPrice;
+
+                // Звільнення місць
+                // Ключ для occupiedSeats: `${movieId}_${date}_${time}`
+                const showtimeParts = ticket.showtime.split(' ');
+                // Припускаємо, що формат showtime такий: "Дата Час" або "Сьогодні, Дата Час"
+                let dateKey = showtimeParts[0];
+                let timeKey = showtimeParts[1];
+                if (showtimeParts.length > 2) { // Якщо є "Сьогодні, 12 червня 10:00"
+                    dateKey = `${showtimeParts[0]} ${showtimeParts[1]}`;
+                    timeKey = showtimeParts[2];
+                }
+                const key = `${ticket.movieId}_${dateKey}_${timeKey}`;
+
+                if (occupiedSeats[key]) {
+                    occupiedSeats[key] = occupiedSeats[key].filter(seat => !ticket.seats.includes(seat));
+                }
+                localStorage.setItem('occupiedSeats', JSON.stringify(occupiedSeats));
+
+
+                // Видалення квитка
+                currentUser.tickets.splice(ticketIndex, 1);
+                users[currentUser.username] = currentUser;
+                saveUsers();
+
+                alert('Квиток успішно відмінено, кошти повернено.');
+                displayUserTickets(); // Оновити список квитків в особистому кабінеті
+                document.getElementById('profileBalance').textContent = currentUser.balance.toFixed(2); // Оновити баланс
+            }
+        }
+
+        // --- ЗАВАНТАЖЕННЯ АВАТАРА ---
+        function uploadAvatar() {
+            const fileInput = document.getElementById('avatarUpload');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentUser.avatar = e.target.result; // Зберігаємо як Base64
+                    users[currentUser.username] = currentUser;
+                    saveUsers();
+                    document.getElementById('profileAvatar').src = e.target.result;
+                    alert('Аватар успішно завантажено!');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Будь ласка, оберіть файл для завантаження.');
+            }
+        }
+
+        function updateAuthUI() {
+            if (currentUser) {
+                loginButton.style.display = 'none';
+                registerButton.style.display = 'none';
+                logoutButton.style.display = 'inline-block';
+                profileLink.style.display = 'inline-block';
+                if (currentUser.isAdmin) {
+                    adminPanelLink.style.display = 'inline-block';
+                } else {
+                    adminPanelLink.style.display = 'none';
+                }
+            } else {
+                loginButton.style.display = 'inline-block';
+                registerButton.style.display = 'inline-block';
+                logoutButton.style.display = 'none';
+                profileLink.style.display = 'none';
+                adminPanelLink.style.display = 'none';
+            }
+        }
+
+        // --- ЛОГІКА СЛАЙДЕРА ГОЛОВНОГО ЗОБРАЖЕННЯ ---
+        const mainImageSlider = document.getElementById('mainImageSlider');
+
+        function renderSlider() {
+            mainImageSlider.innerHTML = '';
+            premiereMovies = Object.keys(moviesData).filter(key => moviesData[key].isPremiere);
+
+            if (premiereMovies.length === 0) {
+                // Якщо немає прем'єр, показуємо заглушку
+                const defaultImg = document.createElement('img');
+                defaultImg.src = 'default_main_image.jpg'; // Переконайтесь, що у вас є таке зображення
+                defaultImg.alt = 'Немає прем\'єр';
+                defaultImg.classList.add('slider-image', 'active');
+                mainImageSlider.appendChild(defaultImg);
+                const defaultCaption = document.createElement('div');
+                defaultCaption.classList.add('slider-caption', 'active');
+                defaultCaption.textContent = 'Нових прем\'єр поки немає';
+                mainImageSlider.appendChild(defaultCaption);
+                return;
+            }
+
+            premiereMovies.forEach((movieId, index) => {
+                const movie = moviesData[movieId];
+                const img = document.createElement('img');
+                img.src = movie.background || movie.poster;
+                img.alt = movie.title;
+                img.classList.add('slider-image');
+                img.dataset.movieId = movieId;
+                if (index === currentPremiereIndex) {
+                    img.classList.add('active');
+                }
+                mainImageSlider.appendChild(img);
+
+                const caption = document.createElement('div');
+                caption.classList.add('slider-caption');
+                caption.textContent = movie.title;
+                if (index === currentPremiereIndex) {
+                    caption.classList.add('active');
+                }
+                mainImageSlider.appendChild(caption);
+
+                img.addEventListener('click', () => showMovieDetails(movieId));
+            });
+        }
+
+        function showNextPremiere() {
+            const images = mainImageSlider.querySelectorAll('.slider-image');
+            const captions = mainImageSlider.querySelectorAll('.slider-caption');
+
+            if (images.length === 0) return; // Нічого показувати
+
+            images[currentPremiereIndex].classList.remove('active');
+            captions[currentPremiereIndex].classList.remove('active');
+
+            currentPremiereIndex = (currentPremiereIndex + 1) % premiereMovies.length;
+
+            images[currentPremiereIndex].classList.add('active');
+            captions[currentPremiereIndex].classList.add('active');
+        }
+
+        function startSlider() {
+            stopSlider(); // Зупинити попередній, якщо є
+            if (premiereMovies.length > 1) {
+                sliderInterval = setInterval(showNextPremiere, 5000);
+            }
+        }
+
+        function stopSlider() {
+            clearInterval(sliderInterval);
+            sliderInterval = null;
+        }
+
+
+        // --- ВІДОБРАЖЕННЯ ФІЛЬМІВ І РОЗКЛАДУ ---
+        const moviesContainer = document.querySelector('.movies');
+        const scheduleList = document.querySelector('.schedule-list');
+
+        function renderMovies() {
+            moviesContainer.innerHTML = '';
+            for (const movieId in moviesData) {
+                const movie = moviesData[movieId];
+                const movieDiv = document.createElement('div');
+                movieDiv.classList.add('movie');
+                movieDiv.dataset.movieId = movieId;
+                movieDiv.innerHTML = `
+                    <img src="${movie.poster}" alt="${movie.title}">
+                    <h3>${movie.title}</h3>
+                    <p class="movie-genre">${movie.genre}</p>
+                    <p class="movie-rating">Рейтинг: ${movie.rating}</p>
+                    <p class="movie-showtimes">${Object.keys(movie.showtimes)[0] || 'Немає сеансів'}</p>
+                `;
+                movieDiv.addEventListener('click', () => showMovieDetails(movieId));
+                moviesContainer.appendChild(movieDiv);
+            }
+        }
+
+        function renderSchedule() {
+            scheduleList.innerHTML = '';
+            for (const movieId in moviesData) {
+                const movie = moviesData[movieId];
+                if (Object.keys(movie.showtimes).length > 0) {
+                    const scheduleDiv = document.createElement('div');
+                    scheduleDiv.classList.add('schedule');
+                    scheduleDiv.innerHTML = `
+                        <img src="${movie.poster}" alt="${movie.title}">
+                        <h3>${movie.title}</h3>
+                        ${Object.entries(movie.showtimes).map(([date, times]) => `<p>${date}: ${times.join(', ')}</p>`).join('')}
+                        <a href="#" class="buy-button" onclick="showMovieDetails('${movieId}'); return false;">КУПИТИ КВИТОК</a>
+                    `;
+                    scheduleList.appendChild(scheduleDiv);
+                }
+            }
+        }
+
+        // --- ДЕТАЛЬНА СТОРІНКА ФІЛЬМУ ---
+        const detailsPoster = document.getElementById('detailsPoster');
+        const detailsTitle = document.getElementById('detailsTitle');
+        const detailsRating = document.getElementById('detailsRating');
+        const detailsGenre = document.getElementById('detailsGenre');
+        const detailsDuration = document.getElementById('detailsDuration');
+        const detailsDescription = document.getElementById('detailsDescription');
+        const detailsCast = document.getElementById('detailsCast');
+        const detailsShowtimes = document.getElementById('detailsShowtimes');
+        const seatSelectionSection = document.getElementById('seatSelectionSection');
+        const seatGrid = document.getElementById('seatGrid');
+        const selectedSeatsCount = document.getElementById('selectedSeatsCount');
+        const totalPriceElement = document.getElementById('totalPrice');
+        const confirmSeatsButton = document.getElementById('confirmSeatsButton');
+        const detailsHeader = document.getElementById('detailsHeader');
+        const detailsTrailerSection = document.getElementById('detailsTrailerSection');
+        const movieTrailer = document.getElementById('movieTrailer');
+
+
+        let occupiedSeats = JSON.parse(localStorage.getItem('occupiedSeats')) || {};
+        let seatsPerRow = 10;
+        let numRows = 5;
+
+        // Генерація початкових зайнятих місць (якщо ще немає в localStorage)
+        function generateInitialOccupiedSeats() {
+            if (Object.keys(occupiedSeats).length === 0) {
+                Object.keys(moviesData).forEach(movieId => {
+                    const movie = moviesData[movieId];
+                    for (const date in movie.showtimes) {
+                        movie.showtimes[date].forEach(time => {
+                            const key = `${movieId}_${date}_${time}`;
+                            const randomOccupiedCount = Math.floor(Math.random() * (seatsPerRow * numRows * 0.3));
+                            const occupied = [];
+                            for (let i = 0; i < randomOccupiedCount; i++) {
+                                const row = String.fromCharCode(65 + Math.floor(Math.random() * numRows));
+                                const seatNum = Math.floor(Math.random() * seatsPerRow) + 1;
+                                occupied.push(`${row}${seatNum}`);
+                            }
+                            occupiedSeats[key] = [...new Set(occupied)];
+                        });
+                    }
+                });
+                localStorage.setItem('occupiedSeats', JSON.stringify(occupiedSeats));
+            }
+        }
+
+        function showMovieDetails(movieId) {
+            const movie = moviesData[movieId];
+            if (!movie) {
+                console.error("Фільм не знайдено:", movieId);
+                return;
+            }
+
+            stopSlider();
+            currentMovieId = movieId; // Обов'язково встановлюємо currentMovieId
+            document.getElementById('mainContent').style.display = 'none';
+            movieDetailsPage.style.display = 'block';
+            window.scrollTo(0, 0);
+
+            detailsHeader.style.backgroundImage = `url(${movie.background})`;
+            detailsPoster.src = movie.poster;
+            detailsTitle.textContent = movie.title;
+            detailsRating.innerHTML = `Рейтинг: ${movie.rating} <span style="color: #FFD700;">★</span>`;
+            detailsGenre.textContent = `Жанр: ${movie.genre}`;
+            detailsDuration.textContent = `Тривалість: ${movie.duration}`;
+            detailsDescription.textContent = movie.description;
+            detailsCast.textContent = `У ролях: ${movie.cast}`;
+
+            if (movie.trailer && movie.trailer.startsWith('https://www.youtube.com/embed/')) {
+                movieTrailer.src = movie.trailer;
+                detailsTrailerSection.style.display = 'block';
+            } else {
+                movieTrailer.src = '';
+                detailsTrailerSection.style.display = 'none';
+            }
+
+            detailsShowtimes.innerHTML = '';
+            for (const date in movie.showtimes) {
+                movie.showtimes[date].forEach(time => {
+                    const button = document.createElement('button');
+                    button.textContent = `${date} ${time}`;
+                    button.onclick = () => selectShowtime(movieId, date, time);
+                    detailsShowtimes.appendChild(button);
+                });
+            }
+            seatSelectionSection.style.display = 'none';
+            selectedSeats = [];
+            updateSelectedSeatsInfo();
+        }
+
+        function selectShowtime(movieId, date, time) {
+            currentShowtime = `${date} ${time}`;
+            currentPricePerSeat = moviesData[movieId].price;
+
+            seatSelectionSection.style.display = 'block';
+            renderSeats(movieId, date, time);
+            selectedSeats = [];
+            updateSelectedSeatsInfo();
+        }
+
+        function renderSeats(movieId, date, time) {
+            seatGrid.innerHTML = '';
+            const key = `${movieId}_${date}_${time}`;
+            const currentOccupied = occupiedSeats[key] || [];
+
+            for (let row = 0; row < numRows; row++) {
+                for (let seatNum = 1; seatNum <= seatsPerRow; seatNum++) {
+                    const seatId = `${String.fromCharCode(65 + row)}${seatNum}`;
+                    const seatDiv = document.createElement('div');
+                    seatDiv.classList.add('seat');
+                    seatDiv.textContent = seatId;
+                    seatDiv.dataset.seatId = seatId;
+
+                    if (currentOccupied.includes(seatId)) {
+                        seatDiv.classList.add('occupied');
+                    } else {
+                        seatDiv.onclick = () => toggleSeatSelection(seatDiv, seatId);
+                    }
+                    seatGrid.appendChild(seatDiv);
+                }
+            }
+        }
+
+        function toggleSeatSelection(seatDiv, seatId) {
+            if (seatDiv.classList.contains('occupied')) {
+                return;
+            }
+
+            const index = selectedSeats.indexOf(seatId);
+            if (index > -1) {
+                selectedSeats.splice(index, 1);
+                seatDiv.classList.remove('selected');
+            } else {
+                selectedSeats.push(seatId);
+                seatDiv.classList.add('selected');
+            }
+            updateSelectedSeatsInfo();
+        }
+
+        function updateSelectedSeatsInfo() {
+            selectedSeatsCount.textContent = selectedSeats.length;
+            totalPriceElement.textContent = (selectedSeats.length * currentPricePerSeat).toFixed(2);
+            confirmSeatsButton.disabled = selectedSeats.length === 0;
+        }
+
+        confirmSeatsButton.onclick = () => {
+            if (currentUser === null) {
+                alert('Будь ласка, увійдіть у свій акаунт, щоб придбати квитки.');
+                loginModal.style.display = 'flex';
+                return;
+            }
+            if (selectedSeats.length === 0) {
+                alert('Будь ласка, оберіть хоча б одне місце.');
+                return;
+            }
+
+            const totalAmount = selectedSeats.length * currentPricePerSeat;
+            document.getElementById('paymentTotalAmount').value = `${totalAmount.toFixed(2)} грн`; // Встановлюємо суму ДО відкриття модалки
+            document.getElementById('paymentMessage').textContent = '';
+            paymentModal.style.display = 'flex';
+        };
+
+
+        function processPayment(method) {
+            const totalAmount = parseFloat(document.getElementById('paymentTotalAmount').value); // Отримуємо з поля, яке вже оновлено
+            const paymentMessageDiv = document.getElementById('paymentMessage');
+
+            if (method === 'card') {
+                const cardName = document.getElementById('cardName').value;
+                const cardNumber = document.getElementById('cardNumber').value;
+                const cardExpiry = document.getElementById('cardExpiry').value;
+                const cardCvv = document.getElementById('cardCvv').value;
+
+                if (!cardName || !cardNumber || !cardExpiry || !cardCvv) {
+                    paymentMessageDiv.textContent = 'Будь ласка, заповніть всі поля для оплати карткою.';
+                    paymentMessageDiv.style.color = 'red';
+                    return;
+                }
+            }
+
+            if (currentUser.balance < totalAmount) {
+                paymentMessageDiv.textContent = `Недостатньо коштів на балансі. Потрібно ${totalAmount.toFixed(2)} грн, у вас ${currentUser.balance.toFixed(2)} грн.`;
+                paymentMessageDiv.style.color = 'red';
+                return;
+            }
+
+            paymentMessageDiv.textContent = `Обробка платежу через ${method}...`;
+            paymentMessageDiv.style.color = 'orange';
+
+            setTimeout(() => {
+                currentUser.balance -= totalAmount;
+                const movie = moviesData[currentMovieId];
+                const ticket = {
+                    ticketId: Date.now(),
+                    movieId: currentMovieId, // Передаємо movieId
+                    movieTitle: movie.title,
+                    showtime: currentShowtime,
+                    seats: selectedSeats,
+                    totalPrice: totalAmount,
+                    paymentMethod: method
+                };
+                currentUser.tickets.push(ticket);
+                users[currentUser.username] = currentUser;
+                saveUsers();
+
+                const showtimeParts = currentShowtime.split(' ');
+                let dateKey = showtimeParts[0];
+                let timeKey = showtimeParts[1];
+                if (showtimeParts.length > 2) {
+                    dateKey = `${showtimeParts[0]} ${showtimeParts[1]}`;
+                    timeKey = showtimeParts[2];
+                }
+                const key = `${currentMovieId}_${dateKey}_${timeKey}`;
+
+                if (!occupiedSeats[key]) {
+                    occupiedSeats[key] = [];
+                }
+                occupiedSeats[key].push(...selectedSeats);
+                localStorage.setItem('occupiedSeats', JSON.stringify(occupiedSeats));
+
+                paymentMessageDiv.textContent = `Оплата через ${method} пройшла успішно! Квитки придбано.`;
+                paymentMessageDiv.style.color = 'green';
+                setTimeout(() => {
+                    paymentModal.style.display = 'none';
+                    movieDetailsPage.style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    alert(`Квитки успішно придбано через ${method}! Вони доступні в вашому особистому кабінеті.`);
+                    document.getElementById('cardName').value = '';
+                    document.getElementById('cardNumber').value = '';
+                    document.getElementById('cardExpiry').value = '';
+                    document.getElementById('cardCvv').value = '';
+                    startSlider();
+                }, 1500);
+
+            }, 2000);
+        }
+
+        // --- ПОШУК ФІЛЬМІВ ---
+        function searchMovies() {
+            const searchTerm = document.getElementById('movieSearch').value.toLowerCase();
+            const movieElements = document.querySelectorAll('.movies .movie');
+            movieElements.forEach(movieEl => {
+                const title = movieEl.querySelector('h3').textContent.toLowerCase();
+                const genre = movieEl.querySelector('.movie-genre').textContent.toLowerCase();
+                if (title.includes(searchTerm) || genre.includes(searchTerm)) {
+                    movieEl.style.display = 'flex';
+                } else {
+                    movieEl.style.display = 'none';
+                }
+            });
+        }
+
+        // --- АДМІН-ПАНЕЛЬ ---
+        adminPanelLink.onclick = () => {
+            if (currentUser && currentUser.isAdmin) {
+                document.getElementById('mainContent').style.display = 'none';
+                adminPanel.style.display = 'block';
+                stopSlider();
+                renderAdminMovies();
+                renderAdminUsers();
+            } else {
+                alert('У вас немає прав доступу до адмін-панелі.');
+            }
+        };
+
+        document.getElementById('closeAdminPanel').onclick = function() {
+            adminPanel.style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            startSlider();
+            renderMovies();
+            renderSchedule();
+            renderSlider(); // Перезавантажити слайдер після можливих змін прем'єр
+        };
+
+        // Рендерінг списку фільмів в адмін-панелі
+        function renderAdminMovies() {
+            const adminMoviesList = document.getElementById('adminMoviesList');
+            adminMoviesList.innerHTML = '';
+            for (const movieId in moviesData) {
+                const movie = moviesData[movieId];
+                const movieItem = document.createElement('div');
+                movieItem.classList.add('admin-movie-item');
+                movieItem.innerHTML = `
+                    <span>${movie.title}</span>
+                    <div>
+                        <button onclick="editMovie('${movieId}')">Редагувати</button>
+                        <button onclick="deleteMovie('${movieId}')" style="background-color: #dc3545;">Видалити</button>
+                    </div>
+                `;
+                adminMoviesList.appendChild(movieItem);
+            }
+        }
+
+        // Редагування фільму в адмін-панелі
+        function editMovie(movieId) {
+            const movie = moviesData[movieId];
+            if (movie) {
+                document.getElementById('adminMovieId').value = movieId;
+                document.getElementById('adminMovieTitle').value = movie.title;
+                document.getElementById('adminMoviePoster').value = movie.poster;
+                document.getElementById('adminMovieBackground').value = movie.background;
+                document.getElementById('adminMovieGenre').value = movie.genre;
+                document.getElementById('adminMovieRating').value = movie.rating;
+                document.getElementById('adminMovieDuration').value = movie.duration;
+                document.getElementById('adminMovieDescription').value = movie.description;
+                document.getElementById('adminMovieCast').value = movie.cast;
+                document.getElementById('adminMovieTrailer').value = movie.trailer || '';
+                document.getElementById('adminMoviePrice').value = movie.price;
+                document.getElementById('adminMoviePremiere').checked = movie.isPremiere || false;
+            }
+        }
+
+        // Видалення фільму
+        function deleteMovie(movieId) {
+            if (confirm(`Ви впевнені, що хочете видалити фільм "${moviesData[movieId].title}"?`)) {
+                delete moviesData[movieId];
+                saveMoviesData();
+                renderAdminMovies();
+                renderMovies();
+                renderSchedule();
+                renderSlider(); // Оновити слайдер, оскільки прем'єри могли змінитися
+                alert('Фільм успішно видалено.');
+            }
+        }
+
+        // Збереження фільму (додавання/редагування)
+        document.getElementById('saveMovieButton').onclick = () => {
+            const movieId = document.getElementById('adminMovieId').value || `movie_${Date.now()}`;
+            const title = document.getElementById('adminMovieTitle').value;
+            const poster = document.getElementById('adminMoviePoster').value;
+            const background = document.getElementById('adminMovieBackground').value;
+            const genre = document.getElementById('adminMovieGenre').value;
+            const rating = document.getElementById('adminMovieRating').value;
+            const duration = document.getElementById('adminMovieDuration').value;
+            const description = document.getElementById('adminMovieDescription').value;
+            const cast = document.getElementById('adminMovieCast').value;
+            const trailer = document.getElementById('adminMovieTrailer').value;
+            const price = parseFloat(document.getElementById('adminMoviePrice').value);
+            const isPremiere = document.getElementById('adminMoviePremiere').checked;
+
+            if (!title || !poster || !genre || isNaN(price)) {
+                alert('Будь ласка, заповніть всі обов\'язкові поля (Назва, Постер, Жанр, Ціна).');
+                return;
+            }
+
+            moviesData[movieId] = {
+                title,
+                poster,
+                background,
+                genre,
+                rating,
+                duration,
+                description,
+                cast,
+                trailer,
+                price,
+                showtimes: moviesData[movieId] ? moviesData[movieId].showtimes : {},
+                isPremiere: isPremiere
+            };
+            saveMoviesData();
+            renderAdminMovies();
+            renderMovies();
+            renderSchedule();
+            renderSlider(); // Оновити слайдер
+            startSlider(); // Перезапустити слайдер, якщо було зупинено адмін-панеллю
+
+            // Очистити форму
+            document.getElementById('adminMovieId').value = '';
+            document.getElementById('adminMovieTitle').value = '';
+            document.getElementById('adminMoviePoster').value = '';
+            document.getElementById('adminMovieBackground').value = '';
+            document.getElementById('adminMovieGenre').value = '';
+            document.getElementById('adminMovieRating').value = '';
+            document.getElementById('adminMovieDuration').value = '';
+            document.getElementById('adminMovieDescription').value = '';
+            document.getElementById('adminMovieCast').value = '';
+            document.getElementById('adminMovieTrailer').value = '';
+            document.getElementById('adminMoviePrice').value = '';
+            document.getElementById('adminMoviePremiere').checked = false;
+            alert('Фільм успішно збережено!');
+        };
+
+        // Рендерінг користувачів та їх квитків в адмін-панелі
+        function renderAdminUsers() {
+            const adminUsersList = document.getElementById('adminUsersList');
+            adminUsersList.innerHTML = '';
+            for (const username in users) {
+                const user = users[username];
+                // Не показуємо адміна в списку користувачів для зручності
+                if (user.isAdmin) continue;
+
+                const userItem = document.createElement('div');
+                userItem.classList.add('admin-user-item');
+                userItem.innerHTML = `
+                    <span>${user.username} (Баланс: ${user.balance.toFixed(2)} грн)</span>
+                    <button onclick="toggleUserTickets('${username}')">Показати квитки</button>
+                `;
+                adminUsersList.appendChild(userItem);
+
+                const userTicketsContainer = document.createElement('div');
+                userTicketsContainer.id = `userTicketsAdmin_${username}`;
+                userTicketsContainer.style.display = 'none';
+                adminUsersList.appendChild(userTicketsContainer);
+            }
+        }
+
+        function toggleUserTickets(username) {
+            const userTicketsContainer = document.getElementById(`userTicketsAdmin_${username}`);
+            userTicketsContainer.style.display = userTicketsContainer.style.display === 'none' ? 'block' : 'none';
+
+            if (userTicketsContainer.style.display === 'block') {
+                const user = users[username];
+                if (user.tickets.length > 0) {
+                    userTicketsContainer.innerHTML = user.tickets.map(ticket => `
+                        <div class="admin-ticket-item">
+                            <p><strong>Фільм:</strong> ${ticket.movieTitle}</p>
+                            <p><strong>Час:</strong> ${ticket.showtime}</p>
+                            <p><strong>Місця:</strong> ${ticket.seats.join(', ')}</p>
+                            <p><strong>Вартість:</strong> ${ticket.totalPrice.toFixed(2)} грн</p>
+                            <p><strong>Метод оплати:</strong> ${ticket.paymentMethod}</p>
+                            <p><strong>ID квитка:</strong> ${ticket.ticketId}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    userTicketsContainer.innerHTML = '<p style="margin-left: 10px;">Квитки відсутні.</p>';
+                }
+            }
+        }
+
+
+        // --- ТЕХПІДТРИМКА ---
+        supportLink.onclick = () => {
+            if (currentUser) {
+                document.getElementById('supportName').value = currentUser.username;
+                document.getElementById('supportEmail').value = currentUser.email;
+            } else {
+                document.getElementById('supportName').value = '';
+                document.getElementById('supportEmail').value = '';
+            }
+            document.getElementById('supportMessageText').value = '';
+            document.getElementById('supportMessage').textContent = '';
+            supportModal.style.display = 'flex';
+            stopSlider();
+        };
+
+        document.getElementById('submitSupportRequest').onclick = () => {
+            const name = document.getElementById('supportName').value;
+            const email = document.getElementById('supportEmail').value;
+            const messageText = document.getElementById('supportMessageText').value;
+            const supportMessageDiv = document.getElementById('supportMessage');
+
+            if (!name || !email || !messageText) {
+                supportMessageDiv.textContent = 'Будь ласка, заповніть всі поля.';
+                supportMessageDiv.style.color = 'red';
+                return;
+            }
+
+            supportMessageDiv.textContent = 'Ваш запит надіслано. Дякуємо за звернення!';
+            supportMessageDiv.style.color = 'green';
+
+            console.log('Запит до техпідтримки:', { name, email, messageText });
+
+            setTimeout(() => {
+                supportModal.style.display = 'none';
+                startSlider();
+            }, 2000);
+        };
+
+
+        // --- ІНІЦІАЛІЗАЦІЯ ПРИ ЗАВАНТАЖЕННІ СТОРІНКИ ---
+        document.addEventListener('DOMContentLoaded', () => {
+            generateInitialOccupiedSeats();
+            updateAuthUI();
+            renderMovies();
+            renderSchedule();
+            renderSlider();
+            startSlider();
+        });
+    </script>
+</body>
+</html>
